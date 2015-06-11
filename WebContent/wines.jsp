@@ -26,7 +26,9 @@
 					<th>Flavor</th>
 					<th>Type</th>
 					<th>Sugar</th>
-					<th>Location</th>
+					<th>Region</th>
+					<th>Latitude</th>
+					<th>Longitude</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -38,7 +40,9 @@
 						<td>${wine.flavor}</td>
 						<td>${wine.type}</td>
 						<td>${wine.sugar}</td>
-						<td>${wine.location}</td>
+						<td>${wine.region.name}</td>
+						<td>${wine.region.lat}</td>
+						<td>${wine.region.lng}</td>
 					</tr>
 				</c:forEach>
 			</tbody>

@@ -56,6 +56,7 @@ public class Ontology {
 				//Ignores whitespace and case in region name
 				if (region.equalsIgnoreCase(reg) || regexMagick(region).equalsIgnoreCase(reg)) {
 					String currClass = curr.getOntClass().getLocalName();
+					
 					//Recursive method call for subregion
 					if (currClass.equals("Region")) {
 						ArrayList<Wine> newWines = new ArrayList<Wine>();
@@ -65,7 +66,8 @@ public class Ontology {
 							retVal.add(wine);
 						}
 					} else {
-						retVal.add(packWine(curr, fullLoc));
+						Region r = RegionFromProperty(curr.getProperty(p), fullLoc);
+						retVal.add(packWine(curr, fullLoc, r));
 					}
 				}
 			}
@@ -87,10 +89,12 @@ public class Ontology {
 	 * @param wine Individual to be packed.
 	 * @param fullLoc Full wine location.
 	 */
-	private Wine packWine(Individual wine, String fullLoc) {
+	private Wine packWine(Individual wine, String fullLoc, Region r) {
 		Wine packedWine = new Wine();
 
 		packedWine.setName(regexMagick(wine.getLocalName()));
+
+		packedWine.setRegion(r);
 		
 		Property maker = base.getProperty(ns + "hasMaker");
 		if (wine.hasProperty(maker)) {
@@ -124,6 +128,23 @@ public class Ontology {
 	 */
 	private static String getPropertyValue(Statement s) {
 		return regexMagick(s.getObject().toString().split("#")[1]);
+	}
+
+	/**
+	 * 
+	 * @param p 'hasLocation' property of an individual.
+	 * @param fullName Region name with parent regions.
+	 * @return Region with coordinates.
+	 */
+	public Region RegionFromProperty(Statement p, String fullName) {
+		Property lat = base.getProperty(ns + "hasLat");
+		Property lng = base.getProperty(ns + "hasLng");
+		Individual r = base.getIndividual(p.getObject().toString());
+		double dLat = Double.parseDouble(r.getProperty(lat).getObject().
+				toString().split("#")[1].split("C_")[1]);
+		double dLng = Double.parseDouble(r.getProperty(lng).getObject().
+				toString().split("#")[1].split("C_")[1]);
+		return new Region(new String(fullName).replace("/", ", "), dLat, dLng);
 	}
 
 }

@@ -13,6 +13,7 @@ public class Wine implements Serializable {
 	private String type;
 	private String sugar;
 	private String location;
+	private Region region;
 
 	public Wine() {
 		super();
@@ -74,6 +75,14 @@ public class Wine implements Serializable {
 		this.location = location;
 	}
 	
+	public Region getRegion() {
+		return region;
+	}
+
+	public void setRegion(Region region) {
+		this.region = region;
+	}
+
 	@Override
 	public String toString() {
 		return name;
@@ -85,7 +94,8 @@ public class Wine implements Serializable {
 	public String prettyPrint() {
 		return "Name: " + name + "\nMaker: " + maker + "\nBody: " + body + "\nFlavor: " + 
 				flavor + "\nType " + type + "\nSugar: " + sugar + "\nLocation: " + 
-				(new String(location)).replace("/", ", ");
+				(new String(location)).replace("/", ", ") +
+				"\nRegion: " + region;
 	}
 
 }
