@@ -1,6 +1,8 @@
 package backend;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import com.hp.hpl.jena.ontology.Individual;
@@ -15,35 +17,15 @@ public class Ontology {
 
 	private String ns;
 	private OntModel base;
-	
+
 	public Ontology(String source, String ns) {
 		super();
 		this.ns = ns;
 		base = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		base.read(source, "RDF/XML");
 	}
-	
-	/**
-	 * Returns a collection of wines from a given region. 
-	 * Region name is not case or whitespace sensitive.
-	 */
-	public ArrayList<Wine> winesFromRegion(String reg) {
-		return winesFromRegion(reg, "");
-	}
 
-	/**
-	 * Returns a collection of wines from a given region. 
-	 * Region name is not case or whitespace sensitive.
-	 * @param reg Region to get wines from
-	 * @param fullLoc Current iterative region depth
-	 */
-	private ArrayList<Wine> winesFromRegion(String reg, String fullLoc) {
-		//Collects full region localization
-		if (!fullLoc.equals("")) {
-			fullLoc += "/";
-		}
-		fullLoc += regexMagick(reg);
-		
+	public ArrayList<Wine> winesByProximity(GeoLocation reg) {
 		ArrayList<Wine> retVal = new ArrayList<Wine>();
 		//Iterates through all of ontology's individuals
 		for (Iterator<? extends OntResource> i = base.listIndividuals(); i.hasNext(); ) {
@@ -51,30 +33,17 @@ public class Ontology {
 			Property p = base.getProperty(ns + "locatedIn");
 			//Checks if the individual has a location
 			if (curr.hasProperty(p)) {
-				String region = curr.getProperty(p).getObject().toString().
-						split("#")[1].split("Region")[0];
-				//Ignores whitespace and case in region name
-				if (region.equalsIgnoreCase(reg) || regexMagick(region).equalsIgnoreCase(reg)) {
-					String currClass = curr.getOntClass().getLocalName();
-					
-					//Recursive method call for subregion
-					if (currClass.equals("Region")) {
-						ArrayList<Wine> newWines = new ArrayList<Wine>();
-						newWines = winesFromRegion(curr.getLocalName().split("Region")[0], 
-								fullLoc);
-						for (Wine wine : newWines) {
-							retVal.add(wine);
-						}
-					} else {
-						Region r = RegionFromProperty(curr.getProperty(p), fullLoc);
-						retVal.add(packWine(curr, fullLoc, r));
-					}
+				String currClass = curr.getOntClass().getLocalName();
+				if (!currClass.equals("Region")) {
+					Region r = RegionFromProperty(curr.getProperty(p));
+					double dist = GeoCalculator.distance(reg, r.getLoc());
+					retVal.add(packWine(curr, r, dist));
 				}
 			}
-		}		
-		return retVal;
+		}
+		return sortByDistance(retVal);
 	}
-	
+
 	/**
 	 * Turns PascalCase to normal case.
 	 */
@@ -89,13 +58,14 @@ public class Ontology {
 	 * @param wine Individual to be packed.
 	 * @param fullLoc Full wine location.
 	 */
-	private Wine packWine(Individual wine, String fullLoc, Region r) {
+	private Wine packWine(Individual wine, Region r, double dist) {
 		Wine packedWine = new Wine();
 
 		packedWine.setName(regexMagick(wine.getLocalName()));
 
 		packedWine.setRegion(r);
-		
+		packedWine.setDistance(dist);
+
 		Property maker = base.getProperty(ns + "hasMaker");
 		if (wine.hasProperty(maker)) {
 			packedWine.setMaker(getPropertyValue(wine.getProperty(maker)));
@@ -118,8 +88,6 @@ public class Ontology {
 			packedWine.setSugar(getPropertyValue(wine.getProperty(sugar)));
 		}
 
-		packedWine.setLocation(fullLoc);
-		
 		return packedWine;
 	}
 
@@ -136,7 +104,7 @@ public class Ontology {
 	 * @param fullName Region name with parent regions.
 	 * @return Region with coordinates.
 	 */
-	public Region RegionFromProperty(Statement p, String fullName) {
+	public Region RegionFromProperty(Statement p) {
 		Property lat = base.getProperty(ns + "hasLat");
 		Property lng = base.getProperty(ns + "hasLng");
 		Individual r = base.getIndividual(p.getObject().toString());
@@ -144,7 +112,23 @@ public class Ontology {
 				toString().split("#")[1].split("C_")[1]);
 		double dLng = Double.parseDouble(r.getProperty(lng).getObject().
 				toString().split("#")[1].split("C_")[1]);
-		return new Region(new String(fullName).replace("/", ", "), dLat, dLng);
+		String name = p.getObject().toString().split("#")[1];
+		name = regexMagick(name.split("Region")[0]);
+		return new Region(name, dLat, dLng);
+	}
+	
+	public ArrayList<Wine> sortByDistance(ArrayList<Wine> wines) {
+		Collections.sort(wines, new AgeComparator());
+		return wines;
+	}
+	
+	class AgeComparator implements Comparator<Wine> {
+		
+	    @Override
+	    public int compare(Wine a, Wine b) {
+	        return a.getDistance() < b.getDistance() ? -1 : a.getDistance() == b.getDistance() ? 0 : 1;
+	    }
+	
 	}
 
 }

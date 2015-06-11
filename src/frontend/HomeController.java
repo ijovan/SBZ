@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import backend.GeoCalculator;
 import backend.Ontology;
 import backend.Wine;
 
@@ -35,7 +36,7 @@ public class HomeController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String region = request.getParameter("region");
-		ArrayList<Wine> wines = o.winesFromRegion(region);
+		ArrayList<Wine> wines = o.winesByProximity(GeoCalculator.getLangLat(region));
 		request.setAttribute("wines", wines);
 		getServletContext().getRequestDispatcher("/wines.jsp").forward(request, response);
 	}

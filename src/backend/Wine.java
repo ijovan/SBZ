@@ -7,12 +7,12 @@ public class Wine implements Serializable {
 	private static final long serialVersionUID = -2112464206949166975L;
 
 	private String name;
+	private double distance;
 	private String maker;
 	private String body;
 	private String flavor;
 	private String type;
 	private String sugar;
-	private String location;
 	private Region region;
 
 	public Wine() {
@@ -25,6 +25,14 @@ public class Wine implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public double getDistance() {
+		return distance;
+	}
+
+	public void setDistance(double distance) {
+		this.distance = distance;
 	}
 
 	public String getMaker() {
@@ -66,14 +74,6 @@ public class Wine implements Serializable {
 	public void setSugar(String sugar) {
 		this.sugar = sugar;
 	}
-
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
 	
 	public Region getRegion() {
 		return region;
@@ -94,7 +94,6 @@ public class Wine implements Serializable {
 	public String prettyPrint() {
 		return "Name: " + name + "\nMaker: " + maker + "\nBody: " + body + "\nFlavor: " + 
 				flavor + "\nType " + type + "\nSugar: " + sugar + "\nLocation: " + 
-				(new String(location)).replace("/", ", ") +
 				"\nRegion: " + region;
 	}
 

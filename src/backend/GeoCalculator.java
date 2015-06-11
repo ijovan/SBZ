@@ -15,29 +15,29 @@ import org.codehaus.jettison.json.JSONObject;
 public class GeoCalculator {
 
 	public static void main(String[] args) {
-	/*	GeoLocation alsace = new GeoLocation(50.0, 0);
+		/*	GeoLocation alsace = new GeoLocation(50.0, 0);
 		GeoLocation bordeux = new GeoLocation(45.0, 0);*/
-		
+
 		GeoLocation alsace = getLangLat("Alsace");
 		GeoLocation bordeux = getLangLat("Bordeux");
-		
+
 		System.out.println("Udaljenost : " + distance(alsace,bordeux));
 		//System.out.println("Geografska sirina je: "+latitude+ "\nGeografska duzina "+longitude);
 	}
-	
+
 	public static GeoLocation getLangLat(String regija)
 	{
-		 GeoLocation povratna = new GeoLocation();
-		 StringBuilder result = new StringBuilder();	
-		 URL oracle;
+		GeoLocation povratna = new GeoLocation();
+		StringBuilder result = new StringBuilder();	
+		URL oracle;
 		try {
 			oracle = new URL("https://maps.googleapis.com/maps/api/geocode/json?address=" + regija);
-		     URLConnection yc = oracle.openConnection();
-		     BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
-		        String inputLine;
-		        while ((inputLine = in.readLine()) != null) 
-		            result.append(inputLine);
-		        in.close();
+			URLConnection yc = oracle.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) 
+				result.append(inputLine);
+			in.close();
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -46,60 +46,60 @@ public class GeoCalculator {
 			e.printStackTrace();
 		}
 
-	        
-	        try {
-				JSONObject jsonReply = new JSONObject(result.toString());
-				JSONArray jstona =  new JSONArray(jsonReply.get("results").toString());
-				jsonReply = new JSONObject(jstona.getJSONObject(0).get("geometry").toString());
-				jsonReply = new JSONObject(jsonReply.get("location").toString());
-				double longitude = jsonReply.getDouble("lng");
-				double latitude = jsonReply.getDouble("lat");
-				povratna.setLatitude(latitude);
-				povratna.setLongitude(longitude);
-				System.out.println(jsonReply);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	        
-			return povratna;         
+
+		try {
+			JSONObject jsonReply = new JSONObject(result.toString());
+			JSONArray jstona =  new JSONArray(jsonReply.get("results").toString());
+			jsonReply = new JSONObject(jstona.getJSONObject(0).get("geometry").toString());
+			jsonReply = new JSONObject(jsonReply.get("location").toString());
+			double longitude = jsonReply.getDouble("lng");
+			double latitude = jsonReply.getDouble("lat");
+			povratna.setLatitude(latitude);
+			povratna.setLongitude(longitude);
+			System.out.println(jsonReply);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return povratna;         
 
 	}
-	
-	 private static double distance(GeoLocation prva, GeoLocation druga) {
-		 
-		 double lat1 = prva.getLatitude();
-		 double lon1 = prva.getLongitude();
-		 
-		 double lat2 = druga.getLatitude();
-		 double lon2 = druga.getLongitude();
-		   double theta = lon1 - lon2;
 
-		   double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+	public static double distance(GeoLocation prva, GeoLocation druga) {
 
-		   dist = Math.acos(dist);
+		double lat1 = prva.getLatitude();
+		double lon1 = prva.getLongitude();
 
-		   dist = rad2deg(dist);
+		double lat2 = druga.getLatitude();
+		double lon2 = druga.getLongitude();
+		double theta = lon1 - lon2;
 
-		   dist = dist * 60 * 1.1515;
+		double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
 
-   	       dist = dist * 1.609344;
+		dist = Math.acos(dist);
 
-		   return (dist);
+		dist = rad2deg(dist);
 
-		 }
+		dist = dist * 60 * 1.1515;
 
-		 private static double deg2rad(double deg) {
+		dist = dist * 1.609344;
 
-		   return (deg * Math.PI / 180.0);
+		return (dist);
 
-		 }
+	}
 
-		 private static double rad2deg(double rad) {
+	private static double deg2rad(double deg) {
 
-		   return (rad * 180 / Math.PI);
+		return (deg * Math.PI / 180.0);
 
-		 }
+	}
+
+	private static double rad2deg(double rad) {
+
+		return (rad * 180 / Math.PI);
+
+	}
 
 
 }
