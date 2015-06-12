@@ -49,14 +49,17 @@ public class GeoCalculator {
 
 		try {
 			JSONObject jsonReply = new JSONObject(result.toString());
-			JSONArray jstona =  new JSONArray(jsonReply.get("results").toString());
-			jsonReply = new JSONObject(jstona.getJSONObject(0).get("geometry").toString());
-			jsonReply = new JSONObject(jsonReply.get("location").toString());
-			double longitude = jsonReply.getDouble("lng");
-			double latitude = jsonReply.getDouble("lat");
-			povratna.setLatitude(latitude);
-			povratna.setLongitude(longitude);
-			System.out.println(jsonReply);
+			JSONArray jsonArr =  new JSONArray(jsonReply.get("results").toString());
+			if (jsonArr.length() > 0)
+			{
+				jsonReply = new JSONObject(jsonArr.getJSONObject(0).get("geometry").toString());
+				jsonReply = new JSONObject(jsonReply.get("location").toString());
+				double longitude = jsonReply.getDouble("lng");
+				double latitude = jsonReply.getDouble("lat");
+				povratna.setLatitude(latitude);
+				povratna.setLongitude(longitude);
+				System.out.println(jsonReply);
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

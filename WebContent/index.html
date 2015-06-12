@@ -3,7 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <title>Welcome</title>
+<style>
+#map-canvas {
+    width: 500px;
+    height: 400px;
+    background-color: #CCC;
+     }
+
+</style>
+    
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+      
+<script src="https://maps.googleapis.com/maps/api/js"></script>      
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    
 <script>
+
+	function initialize() {
+
+	    var mapCanvas = document.getElementById('map-canvas');
+	    var mapOptions = {
+	      center: new google.maps.LatLng(44.5403, -78.5463),
+	      zoom: 8,
+	      mapTypeId: google.maps.MapTypeId.ROADMAP
+	    }
+	    var map = new google.maps.Map(mapCanvas, mapOptions);
+	  }
+	
 	var x = document.getElementById("demo");
 
 	function getLocation() {
@@ -19,20 +50,48 @@
 		document.getElementById("lng").value = position.coords.longitude;
 		document.forms["coords"].submit();
 	}
+	
+	google.maps.event.addDomListener(window, 'load', initialize);
+	
+
+	  
 </script>
+
+
+   
 </head>
 <body>
+<div class="container">
 	<form action="./HomeController" method="post">
-		<input type="text" name="region"> 
-		<input type="submit" name="submit" value="Find">
-		<br/>
-		<button onclick="getLocation()">Use my location</button>
-		<p id="demo"></p>
-		<br/>
+	<br/>
+	  <div class="col-lg-6">
+	  <h5>Unesite ime regije koju želite da pretražite ili pretražite regije koje su vam u blizini</h5>
+	    <div class="input-group">
+	     <input type="text" class="form-control" placeholder="Search for..." name="region">
+	      <span class="input-group-btn">
+	        <button name="submit" class="btn btn-default" type="submit">Find!</button>
+	      </span>
+	    </div><!-- /input-group -->
+	   	<br/>
+		<button class="btn btn-default" onclick="getLocation()" class="form-control">Use my current location</button>
+	  </div>
+	  <div class="col-lg-6">
+	  <h5>Dodatni parametri pretraživanja vina</h5>
+		
+	  </div>
+	<p id="demo"></p>
 	</form>
+	<div class="col-lg-12"><hr></div>
+
 	<form id="coords" method="post" action="./HomeController">
-		<input type="hidden" id="lat" name="lat"> <input type="hidden"
-			id="lng" name="lng">
+		<input type="hidden" id="lat" name="lat"> <input type="hidden"	id="lng" name="lng">
 	</form>
+	<br/>
+	
+	<div class="col-lg-6" id="map-canvas"></div>
+</div>
+
+
+
 </body>
 </html>
