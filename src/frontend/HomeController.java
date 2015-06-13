@@ -2,8 +2,6 @@ package frontend;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -58,6 +56,7 @@ public class HomeController extends HttpServlet {
 	
 		if (request.getParameter("region") != null) {
 			String region = request.getParameter("region");
+			region = region.replace(' ', '_');
 			wines = o.winesByProximity(GeoCalculator.getLangLat(region));
 		} else {
 			double lat = Double.parseDouble(request.getParameter("lat"));
