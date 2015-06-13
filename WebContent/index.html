@@ -48,7 +48,12 @@
 	function showPosition(position) {
 		document.getElementById("lat").value = position.coords.latitude;
 		document.getElementById("lng").value = position.coords.longitude;
-		document.forms["coords"].submit();
+		document.forms["userInput"].submit();
+	}
+	
+	function justSubmit()
+	{
+		document.forms["userInput"].submit();	
 	}
 	
 	google.maps.event.addDomListener(window, 'load', initialize);
@@ -62,29 +67,80 @@
 </head>
 <body>
 <div class="container">
-	<form action="./HomeController" method="post">
+	<form id="userInput" action="./HomeController" method="post">
 	<br/>
 	  <div class="col-lg-6">
 	  <h5>Unesite ime regije koju želite da pretražite ili pretražite regije koje su vam u blizini</h5>
 	    <div class="input-group">
 	     <input type="text" class="form-control" placeholder="Search for..." name="region">
 	      <span class="input-group-btn">
-	        <button name="submit" class="btn btn-default" type="submit">Find!</button>
+	         <button class="btn btn-default" type="button" onclick="justSubmit()">Find!</button>     
 	      </span>
 	    </div><!-- /input-group -->
 	   	<br/>
 		<button class="btn btn-default" onclick="getLocation()" class="form-control">Use my current location</button>
 	  </div>
+
 	  <div class="col-lg-6">
 	  <h5>Dodatni parametri pretraživanja vina</h5>
+
+		<!-- Select Basic -->
+		<div class="control-group">
+		  <label class="control-label" for="selectBody">Body</label>
+		  <div class="controls">
+		    <select id="selectBody" name="selectBody" class="input-xlarge">
+		      <option selected value="Any">Any</option>
+		      <option>Full</option>
+		      <option>Medium</option>
+		      <option>Light</option>
+		    </select>
+		  </div>
+		</div>
 		
-	  </div>
+		<!-- Select Basic -->
+		<div class="control-group">
+		  <label class="control-label" for="selectFlavor">Flavor</label>
+		  <div class="controls">
+		    <select id="selectFlavor" name="selectFlavor" class="input-xlarge">
+		      <option selected value="Any">Any</option>
+		      <option>Strong</option>
+		      <option>Moderate</option>
+		      <option>Delicate</option>
+		      </select>
+		  </div>
+		</div>
+		
+		<!-- Select Basic -->
+		<div class="control-group">
+		  <label class="control-label" for="selectType">Type</label>
+		  <div class="controls">
+		    <select id="selectType" name="selectType" class="input-xlarge">
+		      <option selected value="Any">Any</option>
+		    </select>
+		  </div>
+		</div>
+		
+		<!-- Select Basic -->
+		<div class="control-group">
+		  <label class="control-label" for="selectSugar">Sugar</label>
+		  <div class="controls">
+		    <select id="selectSugar" name="selectSugar" class="input-xlarge">
+		      <option selected value="Any">Any</option>
+		      <option>Sweet</option>
+		      <option>Dry</option>
+		    </select>
+		  </div>
+		</div>
+		
+	</div>
+
+
 	<p id="demo"></p>
-	</form>
+	
 	<div class="col-lg-12"><hr></div>
 
-	<form id="coords" method="post" action="./HomeController">
-		<input type="hidden" id="lat" name="lat"> <input type="hidden"	id="lng" name="lng">
+	<input type="hidden" id="lat" name="lat"> 
+	<input type="hidden" id="lng" name="lng">
 	</form>
 	<br/>
 	
