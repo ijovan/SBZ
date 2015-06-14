@@ -37,7 +37,7 @@ public class HomeController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("pOCETAK");
-		ArrayList<Wine> wines;
+		ArrayList<Wine> wines = new ArrayList<Wine>();
 		ArrayList<Wine>	returnWines = new ArrayList<Wine>();
 		
 	/*	Enumeration<String> e = request.getParameterNames();
@@ -56,7 +56,7 @@ public class HomeController extends HttpServlet {
 		
 	//	System.out.println("Body : " +body);
 	
-		if (request.getParameter("region") != null) {
+		if (request.getParameter("region") != null && !request.getParameter("region").trim().equals("")) {
 			String region = request.getParameter("region");
 			region = region.replace(' ', '_');
 			wines = o.winesByProximity(GeoCalculator.getLangLat(region));
@@ -64,9 +64,15 @@ public class HomeController extends HttpServlet {
 			lat = gl.getLatitude();
 			lng = gl.getLongitude();
 		} else {
-			lat = Double.parseDouble(request.getParameter("lat"));
-			lng = Double.parseDouble(request.getParameter("lng"));
-			wines = o.winesByProximity(new GeoLocation(lat, lng));
+			System.out.println("lat "+request.getParameter("lat"));
+			System.out.println("long "+request.getParameter("lng"));
+			// Zbog onog duplog pozivanja prvo pozove sa praznim stringom
+			if (!request.getParameter("lat").equals("") && !request.getParameter("lng").equals(""))
+			{
+				lat = Double.parseDouble(request.getParameter("lat"));
+				lng = Double.parseDouble(request.getParameter("lng"));
+				wines = o.winesByProximity(new GeoLocation(lat, lng));
+			}
 		}
 		
 
