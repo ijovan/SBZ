@@ -36,30 +36,19 @@ public class HomeController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("pOCETAK");
+		System.out.println("Pocetak");
 		ArrayList<Wine> wines = new ArrayList<Wine>();
-		ArrayList<Wine>	returnWines = new ArrayList<Wine>();
-		
-	/*	Enumeration<String> e = request.getParameterNames();
-		while(e.hasMoreElements())
-		{
-			String s = e.nextElement();
-			System.out.println("Parametar: " + s);
-		}*/
 		
 		String body = request.getParameter("selectBody");
 		String flavor = request.getParameter("selectFlavor");
-		String type = request.getParameter("selectType");
 		String sugar = request.getParameter("selectSugar");
 		
 		double lat=0, lng=0;
-		
-	//	System.out.println("Body : " +body);
 	
 		if (request.getParameter("region") != null && !request.getParameter("region").trim().equals("")) {
 			String region = request.getParameter("region");
 			region = region.replace(' ', '_');
-			wines = o.winesByProximity(GeoCalculator.getLangLat(region));
+			wines = o.winesByProximity(GeoCalculator.getLangLat(region), sugar, body, flavor);
 			GeoLocation gl = GeoCalculator.getLangLat(region);
 			lat = gl.getLatitude();
 			lng = gl.getLongitude();
@@ -71,66 +60,11 @@ public class HomeController extends HttpServlet {
 			{
 				lat = Double.parseDouble(request.getParameter("lat"));
 				lng = Double.parseDouble(request.getParameter("lng"));
-				wines = o.winesByProximity(new GeoLocation(lat, lng));
+				wines = o.winesByProximity(new GeoLocation(lat, lng), sugar, body, flavor);
 			}
 		}
-		
-
-		for(Wine w : wines)
-		{
-			try{
-				if (!body.equals("Any"))
-					if (w.getBody() != null)
-					{
-						if(!w.getBody().equals(body))
-						{
-							continue;
-						}
-					}
-					else
-						continue;
-				if (!flavor.equals("Any"))
-					if (w.getFlavor() != null)
-					{
-						if(!w.getFlavor().equals(flavor))
-						{
-							continue;
-						}
-					}
-					else
-						continue;
-				if (!type.equals("Any"))
-					if (w.getType() != null)
-					{
-						if(!w.getType().equals(type))
-						{
-							continue;
-						}
-					}
-					else
-						continue;
-				if (!sugar.equals("Any"))
-					if (w.getSugar() != null)
-					{
-						if(!w.getSugar().equals(sugar))
-						{
-							continue;
-						}
-					}
-					else
-						continue;
-				
-			//	System.out.println("Prosao");
-				returnWines.add(w);
-			}
-			catch (NullPointerException e1)
-			{
-				System.out.println("Greska !");
-			}
-		}
-	
-		
-		request.setAttribute("wines", returnWines);
+			
+		request.setAttribute("wines", wines);
 		request.setAttribute("homeLat", lat);
 		request.setAttribute("homeLng", lng);
 		getServletContext().getRequestDispatcher("/wines.jsp").forward(request, response);

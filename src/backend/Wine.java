@@ -93,8 +93,7 @@ public class Wine implements Serializable {
 	 */
 	public String prettyPrint() {
 		return "Name: " + name + "\nMaker: " + maker + "\nBody: " + body + "\nFlavor: " + 
-				flavor + "\nType " + type + "\nSugar: " + sugar + "\nLocation: " + 
-				"\nRegion: " + region;
+				flavor + "\nType: " + type + "\nSugar: " + sugar + "\nRegion: " + region;
 	}
 
 }

@@ -3,45 +3,90 @@ package backend;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.HashSet;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 public class Ontology {
 
 	private String ns;
 	private OntModel base;
 
+	public static void main(String[] args) {
+		Ontology o = new Ontology("wine.rdf", 
+				"http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#");
+		HashSet<Resource> results = o.winesByProperties("Dry", "Medium", "Moderate");
+		ArrayList<Wine> wines = o.getWines(new GeoLocation(0, 0), results);
+		wines = sortByDistance(wines);
+		for (Wine wine : wines) {
+			System.out.println(wine.prettyPrint());
+		}
+	}
+
+	public ArrayList<Wine> winesByProximity(GeoLocation loc, String sugar, String body, String flavor) {
+		HashSet<Resource> results = winesByProperties(sugar, body, flavor);
+		ArrayList<Wine> wines = getWines(loc, results);
+		return sortByDistance(wines);
+	}
+
+	private HashSet<Resource> winesByProperties(String sugar, String body, String flavor) {
+		HashSet<Resource> result;
+		Property hasSugar = base.getProperty(ns + "hasSugar");
+		Property hasBody = base.getProperty(ns + "hasBody");
+		Property hasFlavor = base.getProperty(ns + "hasFlavor");
+		result = getSubjects(null, hasSugar, null);
+		result.addAll(getSubjects(null, hasBody, null));
+		result.addAll(getSubjects(null, hasFlavor, null));
+		if (!sugar.equals("Any")) {
+			Resource rSugar = base.getResource(ns + sugar);
+			result.retainAll(getSubjects(null, hasSugar, rSugar));
+		}
+		if (!sugar.equals("Any")) {
+			Resource rBody = base.getResource(ns + body);
+			result.retainAll(getSubjects(null, hasBody, rBody));
+		}
+		if (!sugar.equals("Any")) {
+			Resource rFlavor = base.getResource(ns + flavor);
+			result.retainAll(getSubjects(null, hasFlavor, rFlavor));
+		}
+		return result;
+	}
+
+	private ArrayList<Wine> getWines(GeoLocation reg, HashSet<Resource> resources) {
+		ArrayList<Wine> retVal = new ArrayList<Wine>();
+		Property p = base.getProperty(ns + "locatedIn");
+		for (Resource wine : resources) {
+			if (wine.getProperty(p) == null) {
+				continue;
+			}
+			Region r = RegionFromProperty(wine.getProperty(p));
+			double dist = GeoCalculator.distance(reg, r.getLoc());
+			retVal.add(packWine(wine, r, dist));
+		}
+		return retVal;
+	}
+
+	private HashSet<Resource> getSubjects(Resource s, Property p, Resource o) {
+		HashSet<Resource> subjects = new HashSet<Resource>();
+		for (StmtIterator i = base.listStatements(s,p,o); i.hasNext(); ) {
+			Statement stmt = i.nextStatement();
+			subjects.add(stmt.getSubject());
+		}
+		return subjects;
+	}
+
 	public Ontology(String source, String ns) {
 		super();
 		this.ns = ns;
 		base = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		base.read(source, "RDF/XML");
-	}
-
-	public ArrayList<Wine> winesByProximity(GeoLocation reg) {
-		ArrayList<Wine> retVal = new ArrayList<Wine>();
-		//Iterates through all of ontology's individuals
-		for (Iterator<? extends OntResource> i = base.listIndividuals(); i.hasNext(); ) {
-			Individual curr = (Individual) i.next();
-			Property p = base.getProperty(ns + "locatedIn");
-			//Checks if the individual has a location
-			if (curr.hasProperty(p)) {
-				String currClass = curr.getOntClass().getLocalName();
-				if (!currClass.equals("Region")) {
-					Region r = RegionFromProperty(curr.getProperty(p));
-					double dist = GeoCalculator.distance(reg, r.getLoc());
-					retVal.add(packWine(curr, r, dist));
-				}
-			}
-		}
-		return sortByDistance(retVal);
 	}
 
 	/**
@@ -58,7 +103,7 @@ public class Ontology {
 	 * @param wine Individual to be packed.
 	 * @param fullLoc Full wine location.
 	 */
-	private Wine packWine(Individual wine, Region r, double dist) {
+	private Wine packWine(Resource wine, Region r, double dist) {
 		Wine packedWine = new Wine();
 
 		packedWine.setName(regexMagick(wine.getLocalName()));
@@ -81,7 +126,8 @@ public class Ontology {
 			packedWine.setFlavor(getPropertyValue(wine.getProperty(flavor)));
 		}
 
-		packedWine.setType(regexMagick(wine.getOntClass().getLocalName()));
+		packedWine.setType(regexMagick(
+				base.getIndividual(wine.toString()).getOntClass().getLocalName()));
 
 		Property sugar = base.getProperty(ns + "hasSugar");
 		if (wine.hasProperty(sugar)) {
@@ -116,19 +162,19 @@ public class Ontology {
 		name = regexMagick(name.split("Region")[0]);
 		return new Region(name, dLat, dLng);
 	}
-	
-	public ArrayList<Wine> sortByDistance(ArrayList<Wine> wines) {
+
+	private static ArrayList<Wine> sortByDistance(ArrayList<Wine> wines) {
 		Collections.sort(wines, new AgeComparator());
 		return wines;
 	}
-	
-	class AgeComparator implements Comparator<Wine> {
-		
-	    @Override
-	    public int compare(Wine a, Wine b) {
-	        return a.getDistance() < b.getDistance() ? -1 : a.getDistance() == b.getDistance() ? 0 : 1;
-	    }
-	
+
+	static class AgeComparator implements Comparator<Wine> {
+
+		@Override
+		public int compare(Wine a, Wine b) {
+			return a.getDistance() < b.getDistance() ? -1 : a.getDistance() == b.getDistance() ? 0 : 1;
+		}
+
 	}
 
 }
