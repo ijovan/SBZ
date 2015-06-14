@@ -48,11 +48,11 @@ public class Ontology {
 			Resource rSugar = base.getResource(ns + sugar);
 			result.retainAll(getSubjects(null, hasSugar, rSugar));
 		}
-		if (!sugar.equals("Any")) {
+		if (!body.equals("Any")) {
 			Resource rBody = base.getResource(ns + body);
 			result.retainAll(getSubjects(null, hasBody, rBody));
 		}
-		if (!sugar.equals("Any")) {
+		if (!flavor.equals("Any")) {
 			Resource rFlavor = base.getResource(ns + flavor);
 			result.retainAll(getSubjects(null, hasFlavor, rFlavor));
 		}

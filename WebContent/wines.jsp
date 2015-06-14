@@ -1,6 +1,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<jsp:useBean id="wines" type="java.util.List" scope="request" />
+<c:if test="${wines != null}">
+	<jsp:useBean id="wines" type="java.util.List" scope="request" />
+</c:if>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -144,22 +147,13 @@
 		
 		<!-- Select Basic -->
 		<div class="control-group">
-		  <label class="control-label" for="selectType">Type</label>
-		  <div class="controls">
-		    <select id="selectType" name="selectType" class="input-xlarge">
-		      <option selected value="Any">Any</option>
-		    </select>
-		  </div>
-		</div>
-		
-		<!-- Select Basic -->
-		<div class="control-group">
 		  <label class="control-label" for="selectSugar">Sugar</label>
 		  <div class="controls">
 		    <select id="selectSugar" name="selectSugar" class="input-xlarge">
 		      <option selected value="Any">Any</option>
 		      <option>Sweet</option>
 		      <option>Dry</option>
+		      <option>Off Dry</option>
 		    </select>
 		  </div>
 		</div>
@@ -181,6 +175,7 @@
 	
 	<br/>
 	<div class="col-lg-12"> 
+	<c:if test="${wines != null}">
 		<table class="table table-striped" id="winesTable">
 			<thead>
 				<tr>
@@ -188,8 +183,8 @@
 					<th>Maker</th>
 					<th>Body</th>
 					<th>Flavor</th>
-					<th>Type</th>
 					<th>Sugar</th>
+					<th>Type</th>
 					<th>Region</th>
 					<th>Distance</th>
 					<th style="display:none;">Long</th>
@@ -203,16 +198,18 @@
 						<td>${wine.maker}</td>
 						<td>${wine.body}</td>
 						<td>${wine.flavor}</td>
-						<td>${wine.type}</td>
 						<td>${wine.sugar}</td>
+						<td>${wine.type}</td>
 						<td>${wine.region.name}</td>
-						<td>${wine.distance}</td>
+						<td><fmt:formatNumber type="number" maxFractionDigits="0" 
+							value="${wine.distance}"/>km</td>
 						<td style="display:none;">${wine.region.loc.longitude}</td>
 						<td style="display:none;">${wine.region.loc.latitude}</td>
 					</tr>
 				</c:forEach>
 			</tbody>
 		</table>
+	</c:if>
 	</div>
 </div>
 </body>

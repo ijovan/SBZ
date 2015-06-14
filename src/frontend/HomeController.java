@@ -36,12 +36,11 @@ public class HomeController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("Pocetak");
 		ArrayList<Wine> wines = new ArrayList<Wine>();
 		
-		String body = request.getParameter("selectBody");
-		String flavor = request.getParameter("selectFlavor");
-		String sugar = request.getParameter("selectSugar");
+		String body = request.getParameter("selectBody").replace(" ","");
+		String flavor = request.getParameter("selectFlavor").replace(" ","");
+		String sugar = request.getParameter("selectSugar").replace(" ","");
 		
 		double lat=0, lng=0;
 	
