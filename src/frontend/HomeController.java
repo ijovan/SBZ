@@ -52,15 +52,20 @@ public class HomeController extends HttpServlet {
 		String type = request.getParameter("selectType");
 		String sugar = request.getParameter("selectSugar");
 		
+		double lat=0, lng=0;
+		
 	//	System.out.println("Body : " +body);
 	
 		if (request.getParameter("region") != null) {
 			String region = request.getParameter("region");
 			region = region.replace(' ', '_');
 			wines = o.winesByProximity(GeoCalculator.getLangLat(region));
+			GeoLocation gl = GeoCalculator.getLangLat(region);
+			lat = gl.getLatitude();
+			lng = gl.getLongitude();
 		} else {
-			double lat = Double.parseDouble(request.getParameter("lat"));
-			double lng = Double.parseDouble(request.getParameter("lng"));
+			lat = Double.parseDouble(request.getParameter("lat"));
+			lng = Double.parseDouble(request.getParameter("lng"));
 			wines = o.winesByProximity(new GeoLocation(lat, lng));
 		}
 		
@@ -120,6 +125,8 @@ public class HomeController extends HttpServlet {
 	
 		
 		request.setAttribute("wines", returnWines);
+		request.setAttribute("homeLat", lat);
+		request.setAttribute("homeLng", lng);
 		getServletContext().getRequestDispatcher("/wines.jsp").forward(request, response);
 	}
 

@@ -34,14 +34,14 @@
 	{
 		  var mapCanvas = document.getElementById('map-canvaswines');
 		    var mapOptions = {
-		      center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+		      center: new google.maps.LatLng('${homeLat}','${homeLng}'),//(position.coords.latitude, position.coords.longitude),
 		      zoom: 1,
 		      mapTypeId: google.maps.MapTypeId.ROADMAP
 		    };
 		    var map = new google.maps.Map(mapCanvas, mapOptions);
 		    
 		    var image = 'imgs/home.png';
-		    var myLatlng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+		    var myLatlng = new google.maps.LatLng('${homeLat}','${homeLng}');
 		    var marker = new google.maps.Marker({
 		        position: myLatlng,
 		        map: map,
