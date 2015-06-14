@@ -36,22 +36,35 @@
 	function centerMap(position)
 	{
 		  var mapCanvas = document.getElementById('map-canvaswines');
-		    var mapOptions = {
-		      center: new google.maps.LatLng('${homeLat}','${homeLng}'),//(position.coords.latitude, position.coords.longitude),
-		      zoom: 1,
-		      mapTypeId: google.maps.MapTypeId.ROADMAP
-		    };
-		    var map = new google.maps.Map(mapCanvas, mapOptions);
-		    
-		    var image = 'imgs/home.png';
-		    var myLatlng = new google.maps.LatLng('${homeLat}','${homeLng}');
-		    var marker = new google.maps.Marker({
-		        position: myLatlng,
-		        map: map,
-		        title: "Home",
-		        icon: image
-		    });
-		    
+		  var homelat = '${homeLat}';
+		  if (homelat!=null && homelat!="")
+			{
+			    var mapOptions = {
+			      center: new google.maps.LatLng('${homeLat}','${homeLng}'),//(position.coords.latitude, position.coords.longitude),
+			      zoom: 1,
+			      mapTypeId: google.maps.MapTypeId.ROADMAP
+			    };
+			    var map = new google.maps.Map(mapCanvas, mapOptions);
+			    
+			    var image = 'imgs/home.png';
+			    var myLatlng = new google.maps.LatLng('${homeLat}','${homeLng}');
+			    var marker = new google.maps.Marker({
+			        position: myLatlng,
+			        map: map,
+			        title: "Home",
+			        icon: image
+			    });
+			}
+		  else
+			  {
+			  var mapOptions = {
+				      center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+				      zoom: 8,
+				      mapTypeId: google.maps.MapTypeId.ROADMAP
+				    };
+				    var map = new google.maps.Map(mapCanvas, mapOptions);
+				   
+			  }
 		    
 		    var table = document.getElementById('winesTable');
 	        for (var r = 1, n = table.rows.length; r < n; r++) {
@@ -105,7 +118,7 @@
 <form id="userInput">
 	<br/>
 	  <div class="col-lg-6">
-	  <h5>Unesite ime regije koju želite da pretražite ili pretražite regije koje su vam u blizini</h5>
+	  <h5>Input region name:</h5>
 	    <div class="input-group">
 	     <input type="text" class="form-control" placeholder="Search for..." name="region">
 	      <span class="input-group-btn">
@@ -117,7 +130,7 @@
 	  </div>
 
 	  <div class="col-lg-6">
-	  <h5>Dodatni parametri pretraživanja vina</h5>
+	  <h5>Filter by:</h5>
 
 		<!-- Select Basic -->
 		<div class="control-group">
