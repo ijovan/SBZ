@@ -76,11 +76,14 @@
 	function showPosition(position) {
 		document.getElementById("lat").value = position.coords.latitude;
 		document.getElementById("lng").value = position.coords.longitude;
-		document.forms["userInput"].submit();
+		//document.forms["userInput"].submit();
+		justSubmit();
 	}
 	
 	function justSubmit()
 	{
+		document.forms["userInput"].action="./HomeController";
+		document.forms["userInput"].method="post";
 		document.forms["userInput"].submit();	
 	}
 	
@@ -96,7 +99,7 @@
 </head>
 <body>
 <div class="container">
-<form id="userInput" action="./HomeController" method="post">
+<form id="userInput">
 	<br/>
 	  <div class="col-lg-6">
 	  <h5>Unesite ime regije koju želite da pretražite ili pretražite regije koje su vam u blizini</h5>
@@ -107,7 +110,7 @@
 	      </span>
 	    </div><!-- /input-group -->
 	   	<br/>
-		<button class="btn btn-default" onclick="getLocation()" class="form-control">Use my current location</button>
+		<button class="btn btn-default" type="button" onclick="getLocation()" class="form-control">Use my current location</button>
 	  </div>
 
 	  <div class="col-lg-6">
@@ -174,7 +177,7 @@
 	<hr>
 	<br/>
 	
-	<div class="col-lg-6" id="map-canvaswines"></div>
+	<div class="col-lg-6" id="map-canvaswines" style="margin-bottom:20px;display: inline-block;"></div>
 	
 	<br/>
 	<div class="col-lg-12"> 
