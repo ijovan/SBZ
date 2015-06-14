@@ -6,9 +6,65 @@
 <html>
 <head>
 <title>Wines</title>
+<style>
+#map-canvaswines {
+    width: 500px;
+    height: 400px;
+    background-color: #CCC;
+     }
+
+</style>
+
+
+<script src="https://maps.googleapis.com/maps/api/js"></script>    
+
 <script>
 	var x = document.getElementById("demo");
 
+	window.onload = function() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(centerMap);
+		} else {
+			x.innerHTML = "Geolocation is not supported by this browser.";
+		}
+    };
+    
+	
+	function centerMap(position)
+	{
+		  var mapCanvas = document.getElementById('map-canvaswines');
+		    var mapOptions = {
+		      center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+		      zoom: 1,
+		      mapTypeId: google.maps.MapTypeId.ROADMAP
+		    };
+		    var map = new google.maps.Map(mapCanvas, mapOptions);
+		    
+		    var image = 'imgs/home.png';
+		    var myLatlng = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+		    var marker = new google.maps.Marker({
+		        position: myLatlng,
+		        map: map,
+		        title: "Home",
+		        icon: image
+		    });
+		    
+		    
+		    var table = document.getElementById('winesTable');
+	        for (var r = 1, n = table.rows.length; r < n; r++) {
+	                var lat = table.rows[r].cells[9].innerHTML;
+	                var lng = table.rows[r].cells[8].innerHTML;
+	                var name = table.rows[r].cells[0].innerHTML;
+	                var myLatlng = new google.maps.LatLng(lat,lng);
+				    var marker = new google.maps.Marker({
+				        position: myLatlng,
+				        map: map,
+				        title: name
+				    }); 
+	        }
+	}
+	
+	
 	function getLocation() {
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(showPosition);
@@ -27,6 +83,8 @@
 	{
 		document.forms["userInput"].submit();	
 	}
+	
+	
 </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -115,9 +173,12 @@
 	</form>
 	<hr>
 	<br/>
+	
+	<div class="col-lg-6" id="map-canvaswines"></div>
+	
 	<br/>
 	<div class="col-lg-12"> 
-		<table class="table table-striped">
+		<table class="table table-striped" id="winesTable">
 			<thead>
 				<tr>
 					<th>Name</th>
@@ -128,6 +189,8 @@
 					<th>Sugar</th>
 					<th>Region</th>
 					<th>Distance</th>
+					<th style="display:none;">Long</th>
+					<th style="display:none;">Lat</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -141,6 +204,8 @@
 						<td>${wine.sugar}</td>
 						<td>${wine.region.name}</td>
 						<td>${wine.distance}</td>
+						<td style="display:none;">${wine.region.loc.longitude}</td>
+						<td style="display:none;">${wine.region.loc.latitude}</td>
 					</tr>
 				</c:forEach>
 			</tbody>
