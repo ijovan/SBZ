@@ -19,46 +19,64 @@ public class Ontology {
 	private String ns;
 	private OntModel base;
 
+	public Ontology(String source, String ns) {
+		super();
+		this.ns = ns;
+		base = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		base.read(source, "RDF/XML");
+	}
+	
+	/**
+	 * Demo
+	 */
 	public static void main(String[] args) {
 		Ontology o = new Ontology("wine.rdf", 
 				"http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#");
-		HashSet<Resource> results = o.winesByProperties("Dry", "Medium", "Moderate");
-		ArrayList<Wine> wines = o.getWines(new GeoLocation(0, 0), results);
-		wines = sortByDistance(wines);
+		ArrayList<Wine> wines = 
+				o.winesByProximity(new GeoLocation(0, 0), "Dry", "Medium", "Moderate");
 		for (Wine wine : wines) {
 			System.out.println(wine.prettyPrint());
 		}
 	}
 
+	/**
+	 * Returns wines with given properties, sorted by their distance from the given location.
+	 */
 	public ArrayList<Wine> winesByProximity(GeoLocation loc, String sugar, String body, String flavor) {
 		HashSet<Resource> results = winesByProperties(sugar, body, flavor);
 		ArrayList<Wine> wines = getWines(loc, results);
 		return sortByDistance(wines);
 	}
 
+	/**
+	 * Returns wines with given properties.
+	 */
 	private HashSet<Resource> winesByProperties(String sugar, String body, String flavor) {
 		HashSet<Resource> result;
 		Property hasSugar = base.getProperty(ns + "hasSugar");
 		Property hasBody = base.getProperty(ns + "hasBody");
 		Property hasFlavor = base.getProperty(ns + "hasFlavor");
-		result = getSubjects(null, hasSugar, null);
-		result.addAll(getSubjects(null, hasBody, null));
-		result.addAll(getSubjects(null, hasFlavor, null));
+		result = getSubjects(hasSugar, null);
+		result.addAll(getSubjects(hasBody, null));
+		result.addAll(getSubjects(hasFlavor, null));
 		if (!sugar.equals("Any")) {
 			Resource rSugar = base.getResource(ns + sugar);
-			result.retainAll(getSubjects(null, hasSugar, rSugar));
+			result.retainAll(getSubjects(hasSugar, rSugar));
 		}
 		if (!body.equals("Any")) {
 			Resource rBody = base.getResource(ns + body);
-			result.retainAll(getSubjects(null, hasBody, rBody));
+			result.retainAll(getSubjects(hasBody, rBody));
 		}
 		if (!flavor.equals("Any")) {
 			Resource rFlavor = base.getResource(ns + flavor);
-			result.retainAll(getSubjects(null, hasFlavor, rFlavor));
+			result.retainAll(getSubjects(hasFlavor, rFlavor));
 		}
 		return result;
 	}
 
+	/**
+	 * Creates Wine objects from ontology resources.
+	 */
 	private ArrayList<Wine> getWines(GeoLocation reg, HashSet<Resource> resources) {
 		ArrayList<Wine> retVal = new ArrayList<Wine>();
 		Property p = base.getProperty(ns + "locatedIn");
@@ -73,20 +91,19 @@ public class Ontology {
 		return retVal;
 	}
 
-	private HashSet<Resource> getSubjects(Resource s, Property p, Resource o) {
+	/**
+	 * Gets subjects from statements that match the inputs.
+	 * @param p - Predicate
+	 * @param o - Object
+	 * @return Subject
+	 */
+	private HashSet<Resource> getSubjects(Property p, Resource o) {
 		HashSet<Resource> subjects = new HashSet<Resource>();
-		for (StmtIterator i = base.listStatements(s,p,o); i.hasNext(); ) {
+		for (StmtIterator i = base.listStatements(null, p, o); i.hasNext(); ) {
 			Statement stmt = i.nextStatement();
 			subjects.add(stmt.getSubject());
 		}
 		return subjects;
-	}
-
-	public Ontology(String source, String ns) {
-		super();
-		this.ns = ns;
-		base = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-		base.read(source, "RDF/XML");
 	}
 
 	/**
@@ -163,12 +180,17 @@ public class Ontology {
 		return new Region(name, dLat, dLng);
 	}
 
+	/**
+	 * Sorts wines by their distance attribute.
+	 * @param wines
+	 * @return
+	 */
 	private static ArrayList<Wine> sortByDistance(ArrayList<Wine> wines) {
-		Collections.sort(wines, new AgeComparator());
+		Collections.sort(wines, new DistanceComparator());
 		return wines;
 	}
 
-	static class AgeComparator implements Comparator<Wine> {
+	static class DistanceComparator implements Comparator<Wine> {
 
 		@Override
 		public int compare(Wine a, Wine b) {
